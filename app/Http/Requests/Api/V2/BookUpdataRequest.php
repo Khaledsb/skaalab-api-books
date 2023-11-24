@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Api\V1;
+namespace App\Http\Requests\Api\V2;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
-class BookDestroyRequest extends FormRequest
+class BookUpdataRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,11 +25,15 @@ class BookDestroyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book' => 'required|exists:books,id'
+            'book' => 'required|exists:books,id',
+            'title' => 'required|string',
+            'author' => 'required|string',
+            'publication_year' => 'required|int|digits:4|min:1900|max:' . now()->year,
+            'isbn' => 'required|string|min: 10|max:13|unique:books,isbn,'. request()->route('book'),
         ];
     }
 
-     /**
+    /**
      * Handle a failed validation attempt.
      *
      * @param  \Illuminate\Contracts\Validation\Validator  $validator
@@ -37,14 +41,15 @@ class BookDestroyRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    protected function failedValidation(Validator $validator) : void
-    {   throw new HttpResponseException(
-        response()->json([
-            'errors' => $validator->errors(),
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'errors' => $validator->errors(),
             ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
     }
-     /**
+    /**
      * Prepare the data for validation.
      *
      * @return void

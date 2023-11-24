@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Api\V1;
+namespace App\Http\Requests\Api\V2;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
-class BookShowRequest extends FormRequest
+class BookStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,10 @@ class BookShowRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book' => 'required|exists:books,id'
+            'title' => 'required|string',
+            'author' => 'required|string',
+            'publication_year' => 'required|int|digits:4|min:1900|max:'. now()->year,
+            'isbn' => 'required|string|min: 10|max:13|unique:books,isbn',
         ];
     }
 
@@ -43,16 +46,5 @@ class BookShowRequest extends FormRequest
             'errors' => $validator->errors(),
             ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
-    }
-     /**
-     * Prepare the data for validation.
-     *
-     * @return void
-     */
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'book' => request()->route('book'),
-        ]);
     }
 }
